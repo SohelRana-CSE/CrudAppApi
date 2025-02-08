@@ -15,10 +15,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final TextEditingController _unitPriceTEController = TextEditingController();
   final TextEditingController _quantityTEController = TextEditingController();
   final TextEditingController _totalPriceTEController = TextEditingController();
-  final TextEditingController _productCodeTEController = TextEditingController();
+  final TextEditingController _productCodeTEController =
+      TextEditingController();
   final TextEditingController _imageTEController = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  bool _addNewProductInProgress = false;
 
   @override
   Widget build(BuildContext context) {
@@ -51,8 +54,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 TextFormField(
                   controller: _productCodeTEController,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  decoration:
-                      InputDecoration(hintText: 'Product Code', labelText: 'Product Code'),
+                  decoration: InputDecoration(
+                      hintText: 'Product Code', labelText: 'Product Code'),
                   validator: (String? value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Write your product code';
@@ -128,13 +131,18 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 const SizedBox(
                   height: 16,
                 ),
-                ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _addProduct();
-                      }
-                    },
-                    child: Text('Add'))
+                Visibility(
+                    visible: _addNewProductInProgress == false,
+                    replacement: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    child: ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            _addProduct();
+                          }
+                        },
+                        child: Text('Add')))
               ],
             ),
           ),
@@ -146,6 +154,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
   //URI = Uniform Resource Identifier
   //Future, async, await
   Future<void> _addProduct() async {
+    _addNewProductInProgress = true;
+    setState(() {});
+
     //Step 1: set url
     const String addNewProductUrl =
         'https://crud.teamrabbil.com/api/v1/CreateProduct';
@@ -170,7 +181,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
     print(response.body);
     print(response.headers);
 
-    if(response.statusCode == 200){
+    _addNewProductInProgress = false;
+    setState(() {});
+
+    if (response.statusCode == 200) {
       _imageTEController.clear();
       _productCodeTEController.clear();
       _nameTEController.clear();
@@ -180,15 +194,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('New product added!')),
       );
-    } else{
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Add new product failed!')),
       );
     }
-
-    // TODO: Form Clean
-    // TODO: Add Button in progress
-    // TODO: Toast / snackbar message
   }
 
   @override
@@ -201,3 +211,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     super.dispose();
   }
 }
+
+// TODO: Form Clean
+// TODO: Add Button in progress
+// TODO: Toast / snackbar message
