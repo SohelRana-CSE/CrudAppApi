@@ -78,7 +78,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
       /* List<Map<String, dynamic>> jsonProductList = decodedData['data']; */
       final jsonProductList = decodedData['data'];
       //loop over the list
-      for (Map<String, dynamic> p in jsonProductList){
+      for (Map<String, dynamic> p in jsonProductList) {
         Product product = Product(
             id: p['_id'] ?? '',
             productName: p['ProductName'] ?? 'Unknown',
@@ -86,12 +86,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
             image: p['Img'] ?? 'No Image',
             unitPrice: p['UnitPrice'] ?? '',
             quantity: p['Qty'] ?? '',
-            totalPrice: p['TotalPrice'] ?? ''
-        );
+            totalPrice: p['TotalPrice'] ?? '');
 
         productList.add(product);
       }
-
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Get product list failed! try again')));
@@ -108,10 +106,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
       //   'https://static.nike.com/a/images/c_limit,w_592,f_auto/t_product_v1/92d0dc75-6749-4d04-955f-911a8edce5c8/NIKE+FREE+METCON+6.png',
       //   height: 60,
       // ),
-      title: Text(product.productName, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
-      subtitle: Wrap(
-          spacing: 16,
-          children: [
+      title: Text(
+        product.productName,
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      ),
+      subtitle: Wrap(spacing: 16, children: [
         Text('Unit Price: ${product.unitPrice}'),
         Text('Quantity: ${product.unitPrice}'),
         Text('Total Price: ${product.totalPrice}'),
@@ -119,16 +118,22 @@ class _ProductListScreenState extends State<ProductListScreen> {
       trailing: Wrap(
         children: [
           IconButton(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => UpdateProductScreen()));
-              },
-              icon: Icon(Icons.edit)),
+            icon: Icon(Icons.edit),
+            onPressed: () async{
+              final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => UpdateProductScreen(
+                            product: product,
+                          )));
+              if (result == true ) {
+                _getProductList();
+              }
+            },
+          ),
           IconButton(
               onPressed: () {
-                _showDeleteConfirmationDialog();
+                _showDeleteConfirmationDialog(product.id);
               },
               icon: Icon(Icons.delete)),
         ],
@@ -136,7 +141,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     );
   }
 
-  void _showDeleteConfirmationDialog() {
+  void _showDeleteConfirmationDialog(String productId) {
     showDialog(
         context: context,
         builder: (context) {
@@ -151,6 +156,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   child: Text('Cancel')),
               TextButton(
                   onPressed: () {
+                    _deleteProduct(productId);
                     Navigator.pop(context);
                   },
                   child: Text('Yes, delete')),
@@ -158,6 +164,24 @@ class _ProductListScreenState extends State<ProductListScreen> {
           );
         });
   }
+  Future<void> _deleteProduct(String productId) async {
+    _getProductListInProgress = true;
+    setState(() {});
+
+   String deleteProductUrl =
+        'https://crud.teamrabbil.com/api/v1/DeleteProduct/$productId';
+    Uri uri = Uri.parse(deleteProductUrl);
+
+    Response response = await get(uri);
+    print(response.statusCode);
+    print(response.body);
+    if (response.statusCode == 200) {
+      _getProductList();
+    } else {
+      _getProductListInProgress = false;
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Delete product failed! try again')));
+    }
+  }
 }
-
-
