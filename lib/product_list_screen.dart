@@ -29,17 +29,23 @@ class _ProductListScreenState extends State<ProductListScreen> {
       appBar: AppBar(
         title: const Text("Product List"),
       ),
-      body: Visibility(
-        visible: _getProductListInProgress == false,
-        replacement: const Center(
-          child: CircularProgressIndicator(),
-        ),
-        child: ListView.separated(
-          itemCount: productList.length,
-          itemBuilder: (context, index) {
-            return _buildProductItem(productList[index]);
-          },
-          separatorBuilder: (context, index) => const Divider(),
+      body: RefreshIndicator(
+        // onRefresh: () async{
+        //   _getProductList();
+        // },
+        onRefresh: _getProductList,
+        child: Visibility(
+          visible: _getProductListInProgress == false,
+          replacement: const Center(
+            child: CircularProgressIndicator(),
+          ),
+          child: ListView.separated(
+            itemCount: productList.length,
+            itemBuilder: (context, index) {
+              return _buildProductItem(productList[index]);
+            },
+            separatorBuilder: (context, index) => const Divider(),
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -77,7 +83,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
             id: p['_id'] ?? '',
             productName: p['ProductName'] ?? 'Unknown',
             productCode: p['ProductCode'] ?? '',
-            image: p['Img'] ?? '',
+            image: p['Img'] ?? 'No Image',
             unitPrice: p['UnitPrice'] ?? '',
             quantity: p['Qty'] ?? '',
             totalPrice: p['TotalPrice'] ?? ''
@@ -97,6 +103,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   Widget _buildProductItem(Product product) {
     return ListTile(
+      //leading: Image.network(product.image, height: 60, width: 60,),
       // leading: Image.network(
       //   'https://static.nike.com/a/images/c_limit,w_592,f_auto/t_product_v1/92d0dc75-6749-4d04-955f-911a8edce5c8/NIKE+FREE+METCON+6.png',
       //   height: 60,
