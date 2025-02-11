@@ -164,6 +164,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
           );
         });
   }
+
+
   Future<void> _deleteProduct(String productId) async {
     _getProductListInProgress = true;
     setState(() {});
