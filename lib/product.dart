@@ -17,3 +17,6 @@ class Product {
     required this.totalPrice,
   });
 }
+
+
+
