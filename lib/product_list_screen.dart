@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:crud_app_api/add_product_screen.dart';
-import 'package:crud_app_api/product.dart';
+import 'package:crud_app_api/product_model.dart';
 import 'package:crud_app_api/update_product_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
@@ -15,7 +15,7 @@ class ProductListScreen extends StatefulWidget {
 
 class _ProductListScreenState extends State<ProductListScreen> {
   bool _getProductListInProgress = false;
-  List<Product> productList = [];
+  List<ProductModel> productList = [];
 
   @override
   void initState() {
@@ -78,17 +78,17 @@ class _ProductListScreenState extends State<ProductListScreen> {
       /* List<Map<String, dynamic>> jsonProductList = decodedData['data']; */
       final jsonProductList = decodedData['data'];
       //loop over the list
-      for (Map<String, dynamic> p in jsonProductList) {
-        Product product = Product(
-            id: p['_id'] ?? '',
-            productName: p['ProductName'] ?? 'Unknown',
-            productCode: p['ProductCode'] ?? '',
-            image: p['Img'] ?? 'No Image',
-            unitPrice: p['UnitPrice'] ?? '',
-            quantity: p['Qty'] ?? '',
-            totalPrice: p['TotalPrice'] ?? '');
-
-        productList.add(product);
+      for (Map<String, dynamic> json in jsonProductList) {
+        // Product product = Product(
+            // id: p['_id'] ?? '',
+            // productName: p['ProductName'] ?? 'Unknown',
+            // productCode: p['ProductCode'] ?? '',
+            // image: p['Img'] ?? 'No Image',
+            // unitPrice: p['UnitPrice'] ?? '',
+            // quantity: p['Qty'] ?? '',
+            // totalPrice: p['TotalPrice'] ?? '');
+        ProductModel productModel = ProductModel.fromJson(json);
+        productList.add(productModel);
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -99,7 +99,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     setState(() {});
   }
 
-  Widget _buildProductItem(Product product) {
+  Widget _buildProductItem(ProductModel product) {
     return ListTile(
       //leading: Image.network(product.image, height: 60, width: 60,),
       // leading: Image.network(
@@ -107,7 +107,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
       //   height: 60,
       // ),
       title: Text(
-        product.productName,
+        product.productName ?? 'Unknown',
         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
       subtitle: Wrap(spacing: 16, children: [
@@ -133,7 +133,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
           ),
           IconButton(
               onPressed: () {
-                _showDeleteConfirmationDialog(product.id);
+                _showDeleteConfirmationDialog(product.id!);
               },
               icon: Icon(Icons.delete)),
         ],
